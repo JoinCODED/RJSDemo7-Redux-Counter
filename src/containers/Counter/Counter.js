@@ -1,7 +1,4 @@
 import React, {Component} from 'react';
-import {connect} from 'react-redux';
-
-import * as actionCreators from '../../store/actions';
 
 
 class Counter extends Component {
@@ -33,17 +30,4 @@ class Counter extends Component {
     }
 }
 
-const mapStateToProps = state => {
-    return {
-        ctr: state.counter, 
-    }
-};
-
-const mapDispatchToProps = dispatch => {
-    return {
-        onIncrementCounter: () => dispatch(actionCreators.increment()),
-        onDecrementCounter: () => dispatch(actionCreators.decrement()),
-    };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Counter);
+export default Counter;
