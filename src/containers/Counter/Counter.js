@@ -22,9 +22,13 @@ class Counter extends Component {
     render() {
         return (
             <div>
-            {this.state.counter}
-            <button onClick={this.incrementHandler}>Increment</button>
-            <button onClick={this.decrementHandler}>Decrement</button>
+            <span style={{border: '3px solid black', borderRadius: '8px', color: 'black', display: 'block', margin:'auto',marginBottom: '200px', width:'50%', padding:'10px'}}>{this.state.counter}</span>
+            <button 
+            style={{background:'green', borderRadius: '8px', color: 'white', display: 'block', margin:'auto', width:'50%', padding:'10px'}}
+            onClick={this.incrementHandler}>Increment</button>
+            <button 
+            style={{background:'orange', borderRadius: '8px', color: 'white', display: 'block', margin:'auto', width:'50%', padding:'10px'}}
+            onClick={this.decrementHandler}>Decrement</button>
             </div>
         );
     }
