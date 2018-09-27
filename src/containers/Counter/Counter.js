@@ -22,9 +22,9 @@ class Counter extends Component {
     render() {
         return (
             <div>
-            {this.props.ctr}
-            <button onClick={this.props.onIncrementCounter}>Increment</button>
-            <button onClick={this.props.onDecrementCounter}>Decrement</button>
+            {this.state.counter}
+            <button onClick={this.incrementHandler}>Increment</button>
+            <button onClick={this.decrementHandler}>Decrement</button>
             </div>
         );
     }
