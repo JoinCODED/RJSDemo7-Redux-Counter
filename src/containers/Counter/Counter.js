@@ -8,9 +8,12 @@ class Counter extends Component {
     render() {
         return (
             <div>
-            {this.props.ctr}
-            <button onClick={this.props.onIncrementCounter}>Increment</button>
-            <button onClick={this.props.onDecrementCounter}>Decrement</button>
+            <span style={{border: '3px solid black', borderRadius: '8px', color: 'black', display: 'block', margin:'auto',marginBottom: '200px', width:'50%', padding:'10px'}}>{this.props.ctr}</span>
+            <button onClick={this.props.onIncrementCounter}
+            style={{background:'green', borderRadius: '8px', color: 'white', display: 'block', margin:'auto', width:'50%', padding:'10px'}}>Increment</button>
+            <button onClick={this.props.onDecrementCounter}
+            style={{background:'orange', borderRadius: '8px', color: 'white', display: 'block', margin:'auto', width:'50%', padding:'10px'}}
+            >Decrement</button>
             </div>
         );
     }
