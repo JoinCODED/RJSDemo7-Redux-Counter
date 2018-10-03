@@ -6,17 +6,18 @@ import registerServiceWorker from "./registerServiceWorker";
 
 import { Provider } from "react-redux";
 
-import { createStore, combineReducers } from "redux"; //STEP 1
-import counterReducer from "./store/reducers/counter"; //STEP 2
-import logReducer from "./store/reducers/log"; // STEP 2
+import { createStore, combineReducers } from "redux";
+import counterReducer from "./store/reducers/counter";
+import logReducer from "./store/reducers/log";
 
-//STEP 3
 const rootReducer = combineReducers({
   rootCtr: counterReducer,
   rootLog: logReducer
 });
 
-const store = createStore(rootReducer); //STEP 4
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+const store = createStore(rootReducer, composeEnhancers);
 
 ReactDOM.render(
   <Provider store={store}>
