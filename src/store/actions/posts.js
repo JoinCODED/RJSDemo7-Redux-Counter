@@ -1,18 +1,19 @@
-import * as actionTypes from '../actions/actionTypes';
-import axios from 'axios';
-
+import * as actionTypes from "../actions/actionTypes";
+import axios from "axios";
 
 export const fetchPosts = () => {
-    return (dispatch) => {
-        axios.get('https://jsonplaceholder.typicode.com/posts')
-        .then(res => dispatch(getPosts(res.data)))
-    }
-}
+  return dispatch => {
+    //This function gets called by Redux Thunk
+    axios
+      .get("https://jsonplaceholder.typicode.com/posts")
+      .then(res => res.data)
+      .then(posts =>
+        dispatch({
+          type: actionTypes.FETCH_POSTS,
+          payload: posts
+        })
+      ); //Once we recieve a response, dispatch the action
+  };
+};
 
-export const getPosts = (posts) => {
-    return {
-        type: actionTypes.FETCH_POSTS,
-        payload: posts
-    }
-}
-
+//UDPATE ON WH
