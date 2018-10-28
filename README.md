@@ -255,5 +255,6 @@ log: state.rootLog.logCounter,
 ```
 
 # End of "with-redux" branch
+# Switch to "with-redux" branch to demo Advanced Redux
 
 
