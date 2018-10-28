@@ -1,5 +1,5 @@
 # RJSDemo5-Redux
-# Steps for branches: "starting-point" to "with-redux"
+# Steps for branches: "with-redux" to "with-redux-advanced"
 
 `Keep referring to the [Redux Flow Diagram](https://warehouse.joincoded.com/workshop/redux/intro-to-redux/the-redux-flow/) as you explain these concepts`
 
