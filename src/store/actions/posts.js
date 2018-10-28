@@ -9,11 +9,10 @@ export const fetchPosts = () => {
       .then(res => res.data)
       .then(posts =>
         dispatch({
+          //Once we recieve a response, dispatch the action
           type: actionTypes.FETCH_POSTS,
           payload: posts
         })
-      ); //Once we recieve a response, dispatch the action
+      );
   };
 };
-
-//UDPATE ON WH
