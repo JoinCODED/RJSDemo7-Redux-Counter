@@ -1,13 +1,5 @@
-export {
-    increment,
-    decrement,
-} from './counter';
+export { increment, decrement } from "./counter";
 
+export { log } from "./log";
 
-export {
-    log,
-} from './log';
-
-export {
-    fetchPosts,
-} from './posts';
+export { fetchPosts } from "./posts";
