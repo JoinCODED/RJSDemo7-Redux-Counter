@@ -1,7 +1,7 @@
-import * as actionTypes from './actionTypes';
+import * as actionTypes from "./actionTypes";
 
 export const log = () => {
-    return {
-        type: actionTypes.LOG, 
-    }
-}
+  return {
+    type: actionTypes.LOG
+  };
+};
