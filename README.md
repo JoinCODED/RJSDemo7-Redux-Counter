@@ -7,10 +7,85 @@
 3. Show and explain the [Redux flow diagram](https://warehouse.joincoded.com/workshop/redux/intro-to-redux/the-redux-flow/).
 4. `yarn add redux` and `yarn add react-redux`
 
+# Adding Redux to the Project
+
+5. In`index.js`, set up the App for redux:
+
+```javascript
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.css";
+import App from "./App";
+import registerServiceWorker from "./registerServiceWorker";
+
+import { createStore } from "redux"; //STEP 1
+import { Provider } from "react-redux"; // STEP 2
+
+const store = createStore(()=>{}); //STEP 3 
+// createStore takes an empty function for now (for demoing purposes), but will be replaced with the actual reducer later
+
+//STEP 4
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById("root")
+);
+registerServiceWorker();
+```
+
 # Actions
 
-5. Create `store` folder. In store, create `actions.js`
-6. In `stores/action.js`:
+6. Create `store` folder. In store, create `actions.js`
+7. In `stores/action.js`:
+
+```javascript
+
+export const increment = () => {
+  return {
+  alert("Increment");
+  };
+};
+
+export const decrement = () => {
+  return {
+  alert("Decrement");
+  };
+};
+```
+
+# Actions - Wiring
+
+8.  Time to map and dispatch actions! In `Counter.js` (mapDispatchToProps goes AFTER the class delcaration):
+
+```javascript
+
+import * as actionCreators from '../../store/actions';
+import {connect} from react-redux;
+....
+const mapDispatchToProps = dispatch => {
+  return {
+    onIncrementCounter: () => dispatch(actionCreators.increment()),
+    onDecrementCounter: () => dispatch(actionCreators.decrement()),
+  };
+};
+
+export default connect(null, mapDispatchToProps)(Counter); //null because the first argument takes a mapDispatchToState ... which we do not have yet. 
+
+```
+
+# Actions - Dispatching
+
+9. Now that our actions are wired, let us dispatch:
+
+```javascript
+<button onClick={this.props.onIncrementCounter}>Increment</button>
+<button onClick={this.props.onDecrementCounter}>Decrement</button>
+```
+
+# Actions - Modifying
+
+10. In `stores/action.js` let the functions return objects that specify the type of the actions:
 
 ```javascript
 const INCREMENT = "INCREMENT";
@@ -31,7 +106,7 @@ export const decrement = () => {
 
 # Reducers
 
-6. Create `stores/reducers.js` and inside that:
+11. Create `stores/reducers.js` and inside that:
 
 ```javascript
 const initialState = {
@@ -59,9 +134,9 @@ const reducer = (state = initialState, action) => {
 export default reducer;
 ```
 
-# Adding Redux to the Project
+# Adding The Reducer to the Project
 
-7. In`index.js`, set up the App for redux:
+12. In`index.js`, set up the App for redux:
 
 ```javascript
 import React from "react";
@@ -70,13 +145,13 @@ import "./index.css";
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
 
-import { createStore } from "redux"; //STEP 1
-import { Provider } from "react-redux"; // STEP 2
-import reducer from "./store/reducer"; //STEP 3
+import { createStore } from "redux"; 
+import { Provider } from "react-redux"; 
+import reducer from "./store/reducer"; //STEP 5
 
-const store = createStore(reducer); //STEP 4
+const store = createStore(reducer); //STEP 6
 
-//STEP 5
+
 ReactDOM.render(
   <Provider store={store}>
     <App />
@@ -88,7 +163,7 @@ registerServiceWorker();
 
 # Connect Component to Central Store
 
-8. In `Counter.js`:
+13. In `Counter.js`:
 
 ```javascript
 
@@ -111,52 +186,56 @@ Now our component has access to the "counter" variable in our global store. The 
 
 `{this.props.ctr}`
 
-# Actions - Wiring
+Change the initial value of the counter state to show that we are not using the internal state anymore. 
 
-8.  Time to dispatch actions! In `Counter.js`:
+# The Importance of Returning a Copying State
 
-```javascript
-....
-const mapStateToProps = ....
-const mapDispatchToProps = dispatch => {
+14. In `Counter.js`: 
+
+```
+javascript
+
+const mapStateToProps = state => {
   return {
-    onIncrementCounter: () => dispatch({type: "INCREMENT"}),
-    onDecrementCounter: () => dispatch({type: "DECREMENT"}))
-  };
+    ctr: state.counter,
+    copyMe: state.copyMe
+  }
 };
-
-export default connect(mapStateToProps, mapDispatchToProps)(Counter);
-
 ```
 
-# Actions - Dispatching
+Now our component has access to the "copyMe" variable in our global store. The component can access the counter variable via its props.
 
-9. Now that our actions are wired, let us dispatch:
+`{this.props.copyMe}`
 
-```javascript
-<button onClick={this.props.onIncrementCounter}>Increment</button>
-<button onClick={this.props.onDecrementCounter}>Decrement</button>
+15. After displaying it on the screen, remove the spread operator from the `reducer.js` to show that if we do not copy the older state, the key:value pair get overwritten since they were not included in the new state. 
+
 ```
+javascript
+const reducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "INCREMENT":
+      return {
+        ...state,
+        counter: state.counter + 1
+      };
+    case "DECREMENT":
+      return {
+        ...state,
+        counter: state.counter - 1
+      };
 
-10. Import the `actionCreators` and show them the benefit of using them. That is: to keep code organized and avoid mispelled actions:
-
-```javascript
-import * as actionCreators from '../../store/actions';
-...
-...
-const mapDispatchToProps = dispatch => {
-  return {
-    onIncrementCounter: () => dispatch(actionCreators.increment()),
-    onDecrementCounter: () => dispatch(actionCreators.decrement()),
-  };
+    default:
+      return state;
+  }
 };
-...
 ```
 
-# STOP HERE. GIVE THEM THE CORRESPONDING TASK. Then come back to explaining the below concepts before moving on to advanced-redux
+
+
+# STOP HERE. GIVE THEM THE CORRESPONDING TASK. After demonstrating the solution, come back to explaining the below concepts before moving on to advanced-redux. 
 # Using Multiple Reducers
 
-11. Add a new "Log" button that increments it's own counter, `logCounter`. In `reducer.js`:
+16. Add a new "Log" button that increments it's own counter, `logCounter`. In `reducer.js`:
 
 ```javascript
 const initialState = {
@@ -191,7 +270,7 @@ const reducer = (state = initialState, action) => {
 export default reducer;
 ```
 
-12. Seperate reducers by creating a `reducers` folder with `counter.js` and `log.js` inside. Now, inside `store/reducers/counter.js`:
+17. Seperate reducers by creating a `reducers` folder with `counter.js` and `log.js` inside. Now, inside `store/reducers/counter.js`:
 
 ```javascript
 const initialState = {
@@ -242,7 +321,7 @@ const reducer = (state = initialState, action) => {
 export default reducer;
 ```
 
-12. Now, in `index.js`, combine the reducers:
+18. Now, in `index.js`, combine the reducers:
 
 ```javascript
 import { Provider } from "react-redux";
@@ -268,7 +347,7 @@ ReactDOM.render(
 registerServiceWorker();
 ```
 
-13. Back in `Counter.js`, remap the `mapStateToProps`:
+19. Back in `Counter.js`, remap the `mapStateToProps`:
 
 ```javascript
 const mapStateToProps = state => {
