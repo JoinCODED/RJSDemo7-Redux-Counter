@@ -152,6 +152,6 @@ const mapDispatchToProps = dispatch => {
 };
 ...
 ```
-# End of "with-redux" branch
+# End of "starting-point" branch
 
 # Switch to "with-redux" branch to demo Advanced Redux
