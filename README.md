@@ -42,15 +42,11 @@ registerServiceWorker();
 ```javascript
 
 export const increment = () => {
-  return {
   alert("Increment");
-  };
 };
 
 export const decrement = () => {
-  return {
   alert("Decrement");
-  };
 };
 ```
 
@@ -207,7 +203,7 @@ Now our component has access to the "copyMe" variable in our global store. The c
 
 `{this.props.copyMe}`
 
-15. After displaying it on the screen, remove the spread operator from the `reducer.js` to show that if we do not copy the older state, the key:value pair get overwritten since they were not included in the new state. 
+15. After displaying it on the screen, remove the spread operator from the decrement `reducer.js` to show that if we do not copy the older state, the key:value pair get overwritten since they were not included in the new state. 
 
 ```
 javascript
@@ -220,7 +216,6 @@ const reducer = (state = initialState, action) => {
       };
     case "DECREMENT":
       return {
-        ...state,
         counter: state.counter - 1
       };
 
