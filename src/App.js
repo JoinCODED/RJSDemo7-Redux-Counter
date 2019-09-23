@@ -1,15 +1,17 @@
-import React, { Component } from "react";
+import React from "react";
 
-import Counter from "./Counter";
+import Incrementer from "./Incrementer";
+import Decrementer from "./Decrementer";
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <Counter />
+function App() {
+  return (
+    <div className="App">
+      <div className="row">
+        <Incrementer />
+        <Decrementer />
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 export default App;
