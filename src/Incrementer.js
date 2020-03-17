@@ -1,31 +1,36 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 
-class Incrementer extends Component {
-  state = {
-    counter: 0
-  };
+// Action Creators
+import { increment } from "./redux/actionCreators";
 
-  incrementCounter = () => {
-    let newNumber = this.state.counter + 1;
-    this.setState({ counter: newNumber });
-  };
-
-  render() {
-    return (
-      <div className="col-lg-6">
-        <div className="component">
-          <p>INCREMENTER</p>
-          <p>{this.state.counter}</p>
-          <button
-            className="btn btn-lg btn-outline-dark"
-            onClick={this.incrementCounter}
-          >
-            Increment
-          </button>
-        </div>
+const Incrementer = props => {
+  return (
+    <div className="col-lg-6">
+      <div className="component">
+        <p>INCREMENTER</p>
+        <p>{props.counter}</p>
+        <button
+          className="btn btn-lg btn-outline-dark"
+          onClick={props.decrementCounter}
+        >
+          Increment
+        </button>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
-export default Incrementer;
+const mapStateToProps = state => {
+  return {
+    counter: state.counter
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    decrementCounter: () => dispatch(increment(1))
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Incrementer);

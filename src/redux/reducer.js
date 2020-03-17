@@ -1,15 +1,13 @@
 const initialState = {
-  copyMe2: "Remember to copy me too!",
-  logCounter: 0
+  counter: 0
 };
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case "LOG":
-      const logCounter = state.logCounter + 1;
+    case "INCREMENT":
       return {
         ...state,
-        logCounter: logCounter
+        counter: state.counter + action.payload
       };
     default:
       return state;

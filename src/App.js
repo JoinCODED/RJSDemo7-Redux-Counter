@@ -2,6 +2,7 @@ import React from "react";
 
 import Incrementer from "./Incrementer";
 import Decrementer from "./Decrementer";
+import Posts from "./Posts";
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
       <div className="row">
         <Incrementer />
         <Decrementer />
+        <Posts />
       </div>
     </div>
   );
