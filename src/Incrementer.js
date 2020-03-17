@@ -23,7 +23,7 @@ const Incrementer = props => {
 
 const mapStateToProps = state => {
   return {
-    counter: state.counter
+    counter: state.counterState.counter
   };
 };
 

@@ -39,7 +39,7 @@ const Posts = props => {
 
 const mapStateToProps = state => {
   return {
-    posts: state.posts
+    posts: state.postsState.posts
   };
 };
 
