@@ -4,11 +4,220 @@
 
 `Keep referring to the [Redux Flow Diagram](https://warehouse.joincoded.com/workshop/redux/intro-to-redux/the-redux-flow/) as you explain these concepts`
 
-# Installing Redux Dev Tools
+By the end of this demo, we're going to have a button that fetches posts from a server and displays them.
+
+# 1. Using Multiple Reducers
+
+1. Show the new `posts` state in the reducer. Explain how having all our different unrelated data in one reducer can get confusing and overwhelming very fast.
+
+2. Seperate reducers by creating a `reducers` folder with `counter.js` and `posts.js` inside.
+
+   `redux/reducers/counter.js`:
+
+   ```javascript
+   const initialState = {
+     counter: 0
+   };
+
+   const reducer = (state = initialState, action) => {
+     switch (action.type) {
+       case "INCREMENT":
+         return {
+           ...state,
+           counter: state.counter + action.payload
+         };
+       default:
+         return state;
+     }
+   };
+
+   export default reducer;
+   ```
+
+   `redux/reducers/posts.js`:
+
+   ```javascript
+   const initialState = {
+     posts: []
+   };
+
+   const reducer = (state = initialState, action) => {
+     switch (action.type) {
+       case "SET_POSTS":
+         return {
+           ...state,
+           posts: action.payload
+         };
+       default:
+         return state;
+     }
+   };
+   export default reducer;
+   ```
+
+3. Create a `redux/reducers/index.js` file which combines the reducers and builds and exports the store:
+
+   `redux/reducers/index.js`
+
+   ```javascript
+   import { createStore, combineReducers } from "redux";
+
+   import counterReducer from "./redux/reducers/counter";
+   import postsReducer from "./redux/reducers/posts";
+
+   const rootReducer = combineReducers({
+     counterState: counterReducer,
+     postsState: postsReducer
+   });
+
+   const store = createStore(rootReducer);
+
+   export default store;
+   ```
+
+   `src/index.js`
+
+   ```jsx
+   ...
+   import store from './redux/reducers' // Explain that importing a directory will import its index.js file
+
+   ...
+
+   <Provider store={store}>
+   ```
+
+4. Back in components, remap `mapStateToProps`:
+
+   ```javascript
+   const mapStateToProps = state => {
+     return {
+       counter: state.counterState.counter,
+       posts: state.postsState.posts
+     };
+   };
+   ```
+
+# 2. Restructuring Actions - Tidying Things Up!
+
+1.  Inside `redux`, create `actions` folder. Inside `actions`:
+    a. `actionTypes.js`
+    b. `counter.js`
+    c. `posts.js`
+    d. `index.js`
+
+2.  Move the actionCreators to their respective files:
+
+    `actionCreators/counter.js`
+
+    ```javascript
+    export const increment = step => {
+      return {
+        type: "INCREMENT",
+        payload: step
+      };
+    };
+    ```
+
+    `actionCreators/posts.js`
+
+    ```javascript
+    export const fetchPosts = () => {
+      return {
+        type: "SET_POSTS",
+        payload: [
+          { title: "one thing" },
+          { title: "another thing" },
+          { title: "one more thing" }
+        ]
+      };
+    };
+    ```
+
+3.  inside `actionCreators/actionTypes.js` - keeping a single source of action strings to avoid typos and to improve organization:
+
+    ```javascript
+    export const INCREMENT = "INCREMENT";
+    export const SET_POSTS = "SET_POSTS";
+    ```
+
+4.  Import the action type and start using them (in both actionCreators and reducers):
+
+    `actionCreators/counter.js`
+
+    ```javascript
+    import { INCREMENT } from "./actionTypes";
+
+    export const increment = step => {
+      return {
+        type: INCREMENT
+        payload: step
+      };
+    };
+    ```
+
+    `actionCreators/posts.js`
+
+    ```javascript
+    import { SET_POSTS } from "./actionTypes";
+
+    export const fetchPosts = () => {
+      return {
+        type: SET_POSTS,
+        payload: [
+          { title: "one thing" },
+          { title: "another thing" },
+          { title: "one more thing" }
+        ]
+      };
+    };
+    ```
+
+    `reducers/counter.js`:
+
+    ```javascript
+    import { INCREMENT } from "../actionCreators/actionTypes";
+
+    ...
+        case INCRMENT:
+          return {
+            ...state,
+            counter: state.counter + action.payload
+          };
+    ...
+    ```
+
+    `reducers/posts.js`:
+
+    ```javascript
+    import { SET_POSTS } from "../actionCreators/actionTypes";
+
+    ...
+        case SET_POSTS:
+          return {
+            ...state,
+            posts: action.payload
+          };
+    ...
+    ```
+
+5.  In `actionCreators/index.js`, this file is in charge of exporting all of our actions in the seperate action fiels:
+
+    ```javascript
+    export { increment } from "./counter";
+    export { posts } from "./posts";
+    ```
+
+6.  Update all components by importing the exported actions, and use them in `mapDispatchToProps`:
+
+    ```javascript
+    import { increment } from "./redux/actionCreators";
+    ```
+
+# 3. Installing Redux Dev Tools
 
 1. Install the [Redux Dev Tools](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=en) chrome extension
 
-2. In `index.js`:
+2. In `redux/reducers/index.js`:
 
    ```javascript
 
@@ -25,222 +234,60 @@
 
 Show them the Dev Tool on the Chrome browser.
 
-# Restructuring Actions - Tidying Things Up!
+# 4. Adding Redux Thunk - Async Calls in Redux
 
-3. Inside the `store`, create `actions` folder. Inside `actions`:
-   a. `actionTypes.js`
-   b. `counter.js`
-   c. `log.js`
-   d. `index.js`
+Let's upgrade our `fetchPosts` action creator so it actually fetches the posts from a server.
 
-4. inside `actions/actionTypes.js` - keeping a single source of action strings to avoid typos and to increate organization:
+1. Try to make an axios request in `redux/actionCreators/posts.js`:
 
    ```javascript
-   export const INCREMENT = "INCREMENT";
-   export const DECREMENT = "DECREMENT";
-   export const LOG = "LOG";
-   ```
+   import axios from "axios";
 
-5. Inside `actions/counter.js` - import the action type and start using them:
+   export const fetchPosts = async () => {
+     const res = await axios.get("https://jsonplaceholder.typicode.com/posts");
+     const posts = res.data;
 
-   ```javascript
-   import * as actionTypes from "./actionTypes";
-
-   export const increment = () => {
      return {
-       type: actionTypes.INCREMENT
-     };
-   };
-
-   export const decrement = () => {
-     return {
-       type: actionTypes.DECREMENT
+       type: SET_POSTS,
+       payload: posts
      };
    };
    ```
 
-6. Inside `actions/log.js` - do the same:
+   This will **FAIL** because in pure redux actionCreators **cannot** be `async` functions (i.e. promises)
+
+2. Add the redux-thunk package `yarn add redux-thunk`
+3. In `redux/reducers/index.js`:
 
    ```javascript
-   import * as actionTypes from "./actionTypes";
+   import { applyMiddleware } from "redux";
+   import thunk from "redux-thunk";
 
-   export const log = () => {
-     return {
-       type: actionTypes.LOG
+   const store = createStore(
+     rootReducer,
+     composeEnhancers(applyMiddleware(thunk))
+   );
+   ```
+
+4. Modify the `fetchPosts` function to use `thunk`:
+
+   ```javascript
+   import axios from "axios";
+
+   export const fetchPosts = () => {
+     return async dispatch => {
+       //This function gets called by Redux Thunk
+       const res = await axios.get(
+         "https://jsonplaceholder.typicode.com/posts"
+       );
+       const posts = res.data;
+       dispatch({
+         type: actionTypes.FETCH_POSTS,
+         payload: posts
+       });
      };
    };
    ```
-
-7. In `actions/index/js`, this file is in charge of exporting all of our actions in the seperate action fiels:
-
-   ```javascript
-   export { increment, decrement } from "./counter";
-
-   export { log } from "./log";
-   ```
-
-8. Update `Counter.js` by importing the exported actions, and use them in `mapDispatchToProps`:
-
-   ```javascript
-   import * as actionCreators from "./store/actions/index";
-   ```
-
-# Using the actionTypes in the Reducers
-
-9. In `reducers/counter.js`:
-
-   ```javascript
-   import * as actionTypes from "../actions/actionTypes";
-
-   const initialState = {
-     copyMe: "Remember to copy me!",
-     counter: 0
-   };
-
-   const reducer = (state = initialState, action) => {
-     switch (action.type) {
-       case actionTypes.INCREMENT:
-         return {
-           ...state,
-           counter: state.counter + 1 //copy all of the old state, and only manipulate the part we want to manipulate.
-         };
-       case actionTypes.DECREMENT:
-         return {
-           ...state,
-           counter: state.counter - 1
-         };
-       default:
-         return state;
-     }
-   };
-
-   export default reducer;
-   ```
-
-   In `reducers/log.js`:
-
-   ```javascript
-   import * as actionTypes from "../actions/actionTypes";
-
-   const initialState = {
-     copyMe2: "Remember to copy me too!",
-     logCounter: 0
-   };
-
-   const reducer = (state = initialState, action) => {
-     switch (action.type) {
-       case actionTypes.LOG:
-         const logCounter = state.logCounter + 1;
-         return {
-           ...state,
-           logCounter: logCounter
-         };
-       default:
-         return state;
-     }
-   };
-
-   export default reducer;
-   ```
-
-# Adding Redux Thunk - Async Calls in Redux
-
-10. Add the redux-thunk package `yarn add redux-thunk`
-11. In `index.js`:
-
-    ```javascript
-    import { applyMiddleware } from "redux";
-    import thunk from "redux-thunk";
-
-    const store = createStore(
-      rootReducer,
-      composeEnhancers(applyMiddleware(thunk))
-    );
-    ```
-
-# Handling Async Code
-
-12. In `Counter.js`, add a `Fetch Posts` button that will fetch post from an API
-
-    ```javascript
-    <button onClick={this.props.onFetchPosts}>Fetch Posts</button>
-    ```
-
-13. Create a new actionType in `actionTypes.js` called `FETCH_POSTS`.
-14. Create a `posts.js` in `store/actions` and dispatch an async action:
-
-    ```javascript
-    import * as actionTypes from "../actions/actionTypes";
-    import axios from "axios";
-
-    export const fetchPosts = () => {
-      return async dispatch => {
-        //This function gets called by Redux Thunk
-        const res = await axios.get(
-          "https://jsonplaceholder.typicode.com/posts"
-        );
-        const posts = res.data;
-        dispatch({
-          type: actionTypes.FETCH_POSTS,
-          payload: posts
-        });
-      };
-    };
-    ```
-
-15. Create a `posts.js` in `store/reducers` with:
-
-    ```javascript
-    import * as actionTypes from "../actions/actionTypes";
-
-    const initialState = {
-      copyMe3: "Remeber to copy me!",
-      posts: []
-    };
-
-    const reducer = (state = initialState, action) => {
-      switch (action.type) {
-        case actionTypes.FETCH_POSTS:
-          return {
-            ...state,
-            posts: state.posts.concat(action.payload)
-          };
-        default:
-          return state;
-      }
-    };
-
-    export default reducer;
-    ```
-
-16. In `Counter.js`,add `posts` to `mapStateToProps`, add `onFetchPosts` to `mapDispatchToProps`, and finally, add an onClick to the `Fetch Posts` button:
-
-    ```javascript
-    ...
-    <button onClick={this.props.onFetchPosts}>Fetch Posts</button>
-    <ul>
-      {this.props.posts.map( post => <li>{post.title}</li>)}
-    </ul>
-    ...
-    const mapStateToProps = state => {
-      return {
-        ctr: state.rootCtr.counter,
-        log: state.rootLog.logCounter,
-        posts: state.rootPosts.posts
-      }
-    };
-
-    const mapDispatchToProps = dispatch => {
-      return {
-        onIncrementCounter: () => dispatch(actionCreators.increment()),
-        onDecrementCounter: () => dispatch(actionCreators.decrement()),
-        onLog: () => dispatch(actionCreators.log()),
-        onFetchPosts: () => dispatch(actionCreators.fetchPosts())
-      };
-    };
-
-    ...
-    ```
 
 # End of "with-redux-advanced" branch
 
