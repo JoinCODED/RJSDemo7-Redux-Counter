@@ -8,13 +8,15 @@
 
 3. Explain what a store is, and how it would change the structure of our app. Instead of internal states, we would have the app and its corresponding components connect to central store.
 
-4. Show and explain the [Redux flow diagram](https://warehouse.joincoded.com/workshop/redux/intro-to-redux/the-redux-flow/).
+4. Show and explain the [Redux flow diagram](https://i.imgur.com/BK4FlTy.png).
 
 5. `yarn add redux` and `yarn add react-redux`
 
-# Adding Redux to the Project
+# Part One: Setting up a Central Store
 
-6. In`index.js`, set up the App for redux:
+First, let's disconnect our components from the `App` state and connect them to a central store.
+
+6. In `index.js`, create a redux store with a `counter` state. Wrap the `App` in a `Provider` and pass it the store:
 
    ```jsx
    import React from "react";
@@ -26,7 +28,11 @@
    import { createStore } from "redux"; //STEP 1
    import { Provider } from "react-redux"; // STEP 2
 
-   const store = createStore(() => {}); //STEP 3
+   const store = createStore(() => {
+     return {
+       counter: 0
+     };
+   }); //STEP 3
    // createStore takes an empty function for now (for demoing purposes), but will be replaced with the actual reducer later
 
    //STEP 4
@@ -39,34 +45,58 @@
    registerServiceWorker();
    ```
 
-# Reducers
+7. In `Incrementer.js` and `Decrementer.sj`:
 
-First, let's disconnect our components from the `App` state and connect them to a central store.
+   ```javascript
 
-7. Create `stores/reducer.js` and inside that:
+   import { connect } from react-redux;
+
+   ...
+
+   const mapStateToProps = state => {
+     return {
+       counter: state.counter,
+     }
+   };
+
+   ...
+
+   export default connect(mapStateToProps)(Incrementer/Decrementer);
+   ```
+
+   Now our components have access to the `counter` variable from the global store. The component can access the counter variable via its props.
+
+   `{props.counter}`
+
+   Change the initial value of the counter state in `store` to show that we are not using the internal state anymore. In fact, delete the props being passed from `App.js`.
+
+# Part Two: Defining a Reducer
+
+The function we're passing to `createStore` is called a reducer. It can do more than just return a static state. It gets called to **update** the state. It does this by returning a **new** state, based on the old state. It can get pretty complex, so let's move it into its own file.
+
+8. Create `redux/reducer.js` and inside that:
 
    ```javascript
    const initialState = {
-     copyMe: "Remember to copy me!",
+     copyMe: "Remember to copy me!", // We'll talk about this later
      counter: 0
    };
 
+   // Discuss the "signature" of a reducer: (state, actions) => newState
    const reducer = (state = initialState, action) => {
-     return state;
+     return state; // simple reducer at first
    };
 
    export default reducer;
    ```
 
-# Adding The Reducer to the Project
-
-8. In`index.js`, add the reducer to the store:
+9. In`index.js`, add the reducer to the store - show everything is still connected by manually changing initial state:
 
    ```jsx
    ...
    import { createStore } from "redux";
    import { Provider } from "react-redux";
-   import reducer from "./stores/reducer"; //STEP 5
+   import reducer from "./redux/reducer"; //STEP 5
 
    const store = createStore(reducer); //STEP 6
 
@@ -79,59 +109,134 @@ First, let's disconnect our components from the `App` state and connect them to 
    registerServiceWorker();
    ```
 
-# Connect Component to Central Store
+# Part Three: Dispatching and Handling Actions
 
-13. In `Incrementer.js` and `Decrementer.sj`:
+10. `store.dispatch` accepts an action (object) and passes it to the reducer along with the current state. Use it manually to show the `state` and `action`:
 
-    ```javascript
+    `redux/reducer.js`
 
-    import { connect } from react-redux;
-
-    ...
-
-    const mapStateToProps = state => {
-      return {
-        counter: state.counter,
-      }
+    ```jsx
+    const reducer = (state = initialState, action) => {
+      console.log("reducer state", state);
+      console.log("reducer action", action);
+      return state; // simple reducer at first
     };
-
-    ...
-
-    export default connect(mapStateToProps)(Incrementer/Decrementer);
     ```
 
-    Now our components have access to the `counter` variable from the global store. The component can access the counter variable via its props.
+    `index.js`
 
-    `{props.counter}`
+    ```jsx
+    ...
+    const store = createStore(reducer);
 
-    Change the initial value of the counter state in `stores/reducer.js` to show that we are not using the internal state anymore. In fact, delete the props being passed from `App.js`.
+    store.dispatch() // First - crashes - has to be an object
+    store.dispatch({hello: "hello?"}) // Second - crashes - has to have a type
+    store.dispatch({type: "hello?"}) // Third - works
+    ...
+    ```
 
-# Actions
+11. The reducers job is to update the `state` in response to different types of actions. Let's do something slightly more useful:
 
-Now we need actions that will modify the state...
+    `index.js`
 
-14. Create `stores/actions.js` with:
+    ```jsx
+    ...
+    store.dispatch({type: "INCREMENT"})
+    store.dispatch({type: "INCREMENT"}) // dispatch twice to show that state is being preserved on every call
+    ...
+    ```
+
+    `redux/reducer.js`
+
+    ```jsx
+    const reducer = (state = initialState, action) => {
+      console.log("reducer state", state);
+      console.log("reducer action", action);
+      if (action.type === "INCREMENT") return { counter: state.counter + 1 }; // Has to return a COMPLETELY NEW OBJECT
+      return state; // simple reducer at first
+    };
+    ```
+
+12. We want to dispatch in response to user events. We can use `mapDispatchToProps`:
+
+    `Incrementer.js`
+
+    ```jsx
+    ...
+
+    <button
+      className="btn btn-lg btn-outline-dark"
+      onClick={this.props.incrementCounter}  // STEP 3
+    >
+      Increment
+    </button>
+
+    ...
+
+    /* *****************
+     * STEP 1
+     * Explain that this function gets passed `store.dispatch`
+     * and returns an object with methods that dispatch actions
+     * which get passed to the component as props
+     * ****************/
+    const mapDispatchToProps = dispatch => {
+      return {
+        incrementCounter: () => dispatch({type: "INCREMENT"})
+      }
+    }
+
+    export default connect(mapStateToProps, mapDispatchToProps)(Incrementer); // STEP 2
+    ```
+
+    Repeat the above for `DECREMENT` - reducer + mapDispatchToProps + event handler
+
+13. Clean up the reducer with a `switch` statement:
+
+    `redux/reducer.js`
+
+    ```jsx
+    const reducer = (state = initialState, action) => {
+      switch (action.type) {
+        case "INCREMENT":
+          return {
+            counter: state.counter + 1
+          };
+        case "DECREMENT":
+          return {
+            counter: state.counter - 1
+          };
+        default:
+          return state;
+      }
+    };
+    ```
+
+# Part Four: Action Creators
+
+It's unusual that you'll build and dispatch action objects directly in `mapDispatchToProps`. The `INCRMENT` action is very simple but things can get messy once you start doing more complicated things to _create_ the action e.g. axios requests. We can define functions that _create_ and return actions called actionCreators:
+
+14. Create `redux/actionCreators.js` with:
 
     ```javascript
     export const increment = () => {
-      alert("Increment");
+      return { type: "INCREMENT" };
     };
 
     export const decrement = () => {
-      alert("Decrement");
+      return { type: "DECREMENT" };
     };
     ```
 
-15. Time to use our actions!  
-    Add and connect mapDispatchToProps  
-    Show that these components are receiving these functions as props:
+15. Import the actionCreators into the components and use them in `mapDispatchToProps`:
 
     `Incrementer.js`
 
     ```jsx
 
-    import {increment} from './store/actions';
     import {connect} from "react-redux";
+
+    // Action Creators
+    import {increment} from './redux/actionCreators';
 
     ...
 
@@ -143,7 +248,7 @@ Now we need actions that will modify the state...
 
     ...
 
-    export default connect(mapStateToProps, mapDispatchToProps)(Incrementer); //null because the first argument takes a mapDispatchToState ... which we do not have yet.
+    export default connect(mapStateToProps, mapDispatchToProps)(Incrementer);
 
     ```
 
@@ -151,8 +256,10 @@ Now we need actions that will modify the state...
 
     ```jsx
 
-    import {decrement} from '../../store/actions';
     import {connect} from "react-redux";
+
+    // Action Creators
+    import {decrement} from '.redux/actionCreators';
     ...
     const mapDispatchToProps = dispatch => {
       return {
@@ -160,91 +267,15 @@ Now we need actions that will modify the state...
       };
     };
 
-    export default connect(null, mapDispatchToProps)(Decrementer); //null because the first argument takes a mapDispatchToState ... which we do not have yet.
+    export default connect(mapStateToProps, mapDispatchToProps)(Decrementer);
 
     ```
 
-16. Now that our actions are wired, let us dispatch:
+# Part Five: Payloads
 
-    ```jsx
-    <button onClick={props.incrementCounter}>Increment</button>
-    ```
+The `increment` and `decrement` actionCreators are very similar. They could be combined into a single function that receives a parameter.
 
-    ```jsx
-    <button onClick={props.decrementCounter}>Decrement</button>
-    ```
-
-    The action functions might be running, but they immediately crash and they definitely aren't modifying the store!
-
-# Actions meet Reducer
-
-We need the missing link...  
-We have a central store and we have function that we can run in response to events. We just need to wire them together so that the functions MODIFY the store.
-
-17. In `stores/action.js` let the functions return objects that specify the type of the actions:
-
-    ```javascript
-    const INCREMENT = "INCREMENT";
-    const DECREMENT = "DECREMENT";
-
-    export const increment = () => {
-      return {
-        type: INCREMENT
-      };
-    };
-
-    export const decrement = () => {
-      return {
-        type: DECREMENT
-      };
-    };
-    ```
-
-18. Back in `stores/reducer.js` point out that the switch is recieving an `action` that we're not using. Log this to show that it's the object being returned by the actions!
-
-19. Introduce a `switch` on `action.type` into the reducer that simply logs the type:
-
-    ```javascript
-    const reducer = (state = initialState, action) => {
-      switch (action.type) {
-        case "INCREMENT":
-          alert("INCREMENT");
-          return state;
-        case "DECREMENT":
-          alert("DECREMENT");
-          return state;
-        default:
-          return state;
-      }
-    };
-    ```
-
-20. Stop wasting time and actually update the store!
-
-    ```javascript
-    const reducer = (state = initialState, action) => {
-      switch (action.type) {
-        case "INCREMENT":
-          return {
-            ...state,
-            counter: state.counter + 1
-          };
-        case "DECREMENT":
-          return {
-            ...state,
-            counter: state.counter - 1
-          };
-        default:
-          return state;
-      }
-    };
-    ```
-
-# Payloads
-
-The `increment` and `decrement` actions are very similar. They could be combined into a single function that receives a parameter.
-
-21. In `stores/actions.js`, modify `increment` to take a param:
+21. In `redux/actionCreators.js`, modify `increment` to take a param:
 
     ```javascript
     export const increment = step => {
@@ -280,12 +311,15 @@ The `increment` and `decrement` actions are very similar. They could be combined
     ```javascript
     case "INCREMENT":
       return {
-        ...state,
         counter: state.counter + action.payload
       };
+    default:
+      return state;
     ```
 
-# The Importance of Returning a Copying State
+# Misc
+
+## The Importance of Returning a Copying State
 
 25. In `Incrementer.js`:
 
@@ -302,7 +336,21 @@ The `increment` and `decrement` actions are very similar. They could be combined
 
     `{props.copyMe}`
 
-26. After displaying it on the screen, remove the spread operator from the decrement `reducer.js` to show that if we do not copy the older state, the values will get erased since they were not included in the new state.
+26. After displaying it on the screen, click the button and show that the `copyMe` state gets erased. This is because whatever the reducer returns becomes the **NEW STATE**. Fix it the stupid way first:
+
+    ```javascript
+    case "INCREMENT":
+      return {
+        copyMe: state.copyMe,
+        counter: state.counter + action.payload
+      };
+    ```
+
+    What if you have a lot of state properties?
+    What if you have a lot of different types of actions?
+    Are you going to manually copy the state every time?
+
+27. Explain then use the spread operator:
 
     ```javascript
     const reducer = (state = initialState, action) => {
@@ -310,18 +358,21 @@ The `increment` and `decrement` actions are very similar. They could be combined
         case "INCREMENT":
           return {
             ...state,
-            counter: state.counter + 1
+            counter: state.counter + action.payload
           };
-        case "DECREMENT":
-          return {
-            counter: state.counter - 1
-          };
-
         default:
           return state;
       }
     };
     ```
+
+## `mapDispatchToProps` without `mapStateToProps`:
+
+28. Move the `counter` state and display to `App`. Now `Incrementer` and `Decrementer` don't need `mapStateToProps`. Pass `null` to `connect`:
+
+```javascript
+export default connect(null, mapDispatchToProps)(Decrementer);
+```
 
 # STOP HERE. GIVE THEM THE CORRESPONDING TASK. After demonstrating the solution, come back to explaining the below concepts before moving on to advanced-redux.
 
