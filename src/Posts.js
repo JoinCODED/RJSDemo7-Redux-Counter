@@ -1,4 +1,8 @@
 import React from "react";
+import { connect } from "react-redux";
+
+// Action Creators
+import { fetchPosts } from "./redux/actionCreators";
 
 const Posts = props => {
   const posts = props.posts;
@@ -7,7 +11,7 @@ const Posts = props => {
     return (
       <button
         className="btn btn-lg btn-outline-light mx-auto my-4"
-        onClick={() => alert("FINISH ME")}
+        onClick={props.fetchPosts}
       >
         Fetch Posts
       </button>
@@ -33,4 +37,16 @@ const Posts = props => {
   );
 };
 
-export default Posts;
+const mapStateToProps = state => {
+  return {
+    posts: state.posts
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    fetchPosts: () => dispatch(fetchPosts())
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Posts);

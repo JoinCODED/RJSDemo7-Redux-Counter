@@ -1,5 +1,6 @@
 const initialState = {
-  counter: 0
+  counter: 0,
+  posts: []
 };
 
 const reducer = (state = initialState, action) => {
@@ -8,6 +9,11 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         counter: state.counter + action.payload
+      };
+    case "SET_POSTS":
+      return {
+        ...state,
+        posts: action.payload
       };
     default:
       return state;
