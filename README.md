@@ -55,15 +55,15 @@ By the end of this demo, we're going to have a button that fetches posts from a 
    export default reducer;
    ```
 
-3. Create a `redux/reducers/index.js` file which combines the reducers and builds and exports the store:
+3. Create a `redux/index.js` file which combines the reducers and builds and exports the store:
 
-   `redux/reducers/index.js`
+   `redux/index.js`
 
    ```javascript
    import { createStore, combineReducers } from "redux";
 
-   import counterReducer from "./redux/reducers/counter";
-   import postsReducer from "./redux/reducers/posts";
+   import counterReducer from "./reducers/counter";
+   import postsReducer from "./reducers/posts";
 
    const rootReducer = combineReducers({
      counterState: counterReducer,
@@ -79,7 +79,7 @@ By the end of this demo, we're going to have a button that fetches posts from a 
 
    ```jsx
    ...
-   import store from './redux/reducers' // Explain that importing a directory will import its index.js file
+   import store from './redux' // Explain that importing a directory will import its index.js file
 
    ...
 
@@ -217,7 +217,7 @@ By the end of this demo, we're going to have a button that fetches posts from a 
 
 1. Install the [Redux Dev Tools](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=en) chrome extension
 
-2. In `redux/reducers/index.js`:
+2. In `redux/index.js`:
 
    ```javascript
 
@@ -257,7 +257,8 @@ Let's upgrade our `fetchPosts` action creator so it actually fetches the posts f
    This will **FAIL** because in pure redux actionCreators **cannot** be `async` functions (i.e. promises)
 
 2. Add the redux-thunk package `yarn add redux-thunk`
-3. In `redux/reducers/index.js`:
+
+3. In `redux/index.js`:
 
    ```javascript
    import { applyMiddleware } from "redux";
