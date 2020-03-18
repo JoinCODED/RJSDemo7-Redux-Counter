@@ -28,7 +28,7 @@ const Posts = props => {
       <tbody>
         {posts.map(post => (
           <tr>
-            <th scope="row">1</th>
+            <th scope="row">{post.id}</th>
             <td>{post.title}</td>
           </tr>
         ))}
