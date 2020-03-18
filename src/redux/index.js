@@ -1,8 +1,8 @@
 import { createStore, combineReducers, compose, applyMiddleware } from "redux";
 
 // Reducers
-import counterReducer from "./counter";
-import postsReducer from "./posts";
+import counterReducer from "./reducers/counter";
+import postsReducer from "./reducers/posts";
 
 import thunk from "redux-thunk";
 
