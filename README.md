@@ -1,4 +1,4 @@
-# RJSDemo5-Redux
+# RJSDemo7-Redux
 
 # Steps for branches: "starting-point" to "with-redux"
 
